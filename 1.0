@@ -1,0 +1,322 @@
+import React, { useState } from 'react';
+import { DollarSign, Home, MapPin } from 'lucide-react';
+
+export default function ADUROICalculator() {
+  const [sqft, setSqft] = useState('800');
+  const [zipcode, setZipcode] = useState('');
+  const [monthlyRent, setMonthlyRent] = useState('1500');
+  const [downPayment, setDownPayment] = useState('20');
+  const [interestRate, setInterestRate] = useState('7');
+  const [loanTerm, setLoanTerm] = useState('30');
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Regional ADU cost data ($/sq ft averages)
+  const costByRegion = {
+    '0': { name: 'Northeast', costPerSqft: 350 },
+    '1': { name: 'Mid-Atlantic', costPerSqft: 280 },
+    '2': { name: 'Southeast', costPerSqft: 240 },
+    '3': { name: 'Midwest', costPerSqft: 220 },
+    '4': { name: 'Great Plains', costPerSqft: 200 },
+    '5': { name: 'Southwest', costPerSqft: 260 },
+    '6': { name: 'Mountain West', costPerSqft: 280 },
+    '7': { name: 'Pacific', costPerSqft: 380 },
+  };
+
+  const getRegionFromZipcode = (zip) => {
+    const firstDigit = parseInt(zip.charAt(0));
+    switch (firstDigit) {
+      case 0: return '0';
+      case 1: return '0';
+      case 2: return '1';
+      case 3: return '2';
+      case 4: return '2';
+      case 5: return '3';
+      case 6: return '3';
+      case 7: return '2';
+      case 8: return '4';
+      case 9: return '5';
+      default: return '3';
+    }
+  };
+
+  const calculateROI = () => {
+    setLoading(true);
+
+    if (!zipcode || zipcode.length < 5) {
+      alert('Please enter a valid 5-digit zip code');
+      setLoading(false);
+      return;
+    }
+
+    const sqftNum = parseFloat(sqft);
+    const regionKey = getRegionFromZipcode(zipcode);
+    const region = costByRegion[regionKey];
+    
+    const aduCost = sqftNum * region.costPerSqft;
+    const downPaymentAmount = (aduCost * parseFloat(downPayment)) / 100;
+    const loanAmount = aduCost - downPaymentAmount;
+    const monthlyRate = parseFloat(interestRate) / 100 / 12;
+    const numPayments = parseFloat(loanTerm) * 12;
+    
+    const monthlyPayment = monthlyRate === 0 
+      ? loanAmount / numPayments
+      : (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) / 
+        (Math.pow(1 + monthlyRate, numPayments) - 1);
+    
+    const maintenanceMonthly = (monthlyRent * 0.05);
+    const propertyTaxMonthly = (aduCost * 0.012) / 12;
+    const insuranceMonthly = 50;
+    
+    const totalExpenses = monthlyPayment + maintenanceMonthly + propertyTaxMonthly + insuranceMonthly;
+    const monthlyNetCashFlow = parseFloat(monthlyRent) - totalExpenses;
+    const annualNetCashFlow = monthlyNetCashFlow * 12;
+    
+    const roi = ((annualNetCashFlow / downPaymentAmount) * 100).toFixed(2);
+    const breakEvenMonths = monthlyNetCashFlow > 0 ? Math.ceil(downPaymentAmount / monthlyNetCashFlow) : null;
+
+    setTimeout(() => {
+      setResults({
+        aduCost: aduCost.toFixed(0),
+        region: region.name,
+        downPaymentAmount: downPaymentAmount.toFixed(0),
+        downPaymentPercent: downPayment,
+        loanAmount: loanAmount.toFixed(0),
+        monthlyPayment: monthlyPayment.toFixed(2),
+        monthlyRent: monthlyRent,
+        maintenanceMonthly: maintenanceMonthly.toFixed(2),
+        propertyTaxMonthly: propertyTaxMonthly.toFixed(2),
+        insuranceMonthly: insuranceMonthly.toFixed(2),
+        totalExpenses: totalExpenses.toFixed(2),
+        monthlyNetCashFlow: monthlyNetCashFlow.toFixed(2),
+        annualNetCashFlow: annualNetCashFlow.toFixed(0),
+        roi: roi,
+        breakEvenMonths: breakEvenMonths,
+      });
+      setLoading(false);
+    }, 500);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Home className="w-10 h-10 text-blue-400" />
+            <h1 className="text-4xl font-bold text-white">ADU ROI Calculator</h1>
+          </div>
+          <p className="text-slate-300">Analyze the financial potential of adding an accessory dwelling unit</p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Input Form */}
+          <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <MapPin className="w-6 h-6 text-blue-400" />
+              Property Details
+            </h2>
+
+            <div className="space-y-5">
+              {/* ADU Size */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  ADU Size (sq ft)
+                </label>
+                <input
+                  type="number"
+                  value={sqft}
+                  onChange={(e) => setSqft(e.target.value)}
+                  min="400"
+                  max="1500"
+                  step="50"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter square footage"
+                />
+                <p className="text-xs text-slate-400 mt-1">Typical range: 400-1500 sq ft</p>
+              </div>
+
+              {/* Zip Code */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  Zip Code
+                </label>
+                <input
+                  type="text"
+                  value={zipcode}
+                  onChange={(e) => setZipcode(e.target.value.slice(0, 5))}
+                  maxLength="5"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter 5-digit zip"
+                />
+              </div>
+
+              {/* Monthly Rent */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  Expected Monthly Rent ($)
+                </label>
+                <input
+                  type="number"
+                  value={monthlyRent}
+                  onChange={(e) => setMonthlyRent(e.target.value)}
+                  min="500"
+                  step="50"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Down Payment */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  Down Payment (%)
+                </label>
+                <input
+                  type="number"
+                  value={downPayment}
+                  onChange={(e) => setDownPayment(e.target.value)}
+                  min="0"
+                  max="100"
+                  step="5"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Interest Rate */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  Interest Rate (%)
+                </label>
+                <input
+                  type="number"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(e.target.value)}
+                  min="3"
+                  max="12"
+                  step="0.1"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Loan Term */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  Loan Term (years)
+                </label>
+                <input
+                  type="number"
+                  value={loanTerm}
+                  onChange={(e) => setLoanTerm(e.target.value)}
+                  min="5"
+                  max="30"
+                  step="1"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <button
+                onClick={calculateROI}
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all disabled:opacity-50 mt-6"
+              >
+                {loading ? 'Calculating...' : 'Calculate ROI'}
+              </button>
+            </div>
+          </div>
+
+          {/* Results */}
+          <div>
+            {results ? (
+              <div className="space-y-4">
+                {/* Main ROI Card */}
+                <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-8 shadow-2xl text-white">
+                  <p className="text-sm font-semibold text-green-100 mb-2">Annual ROI</p>
+                  <p className="text-5xl font-bold mb-2">{results.roi}%</p>
+                  <p className="text-green-100 text-sm">Based on {results.downPaymentPercent}% down payment</p>
+                </div>
+
+                {/* Cash Flow Card */}
+                <div className="bg-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700">
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-blue-400" />
+                    Monthly Cash Flow
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-700">
+                      <span className="text-slate-300">Monthly Rent</span>
+                      <span className="text-white font-semibold">${parseFloat(results.monthlyRent).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-700">
+                      <span className="text-slate-300">Loan Payment</span>
+                      <span className="text-red-400">-${parseFloat(results.monthlyPayment).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-700">
+                      <span className="text-slate-300">Maintenance (5%)</span>
+                      <span className="text-red-400">-${parseFloat(results.maintenanceMonthly).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-700">
+                      <span className="text-slate-300">Property Tax</span>
+                      <span className="text-red-400">-${parseFloat(results.propertyTaxMonthly).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-300">Insurance</span>
+                      <span className="text-red-400">-${parseFloat(results.insuranceMonthly).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 bg-slate-700 rounded-lg px-3 border border-slate-600">
+                      <span className="text-white font-semibold">Net Monthly Cash Flow</span>
+                      <span className={`font-bold text-lg ${parseFloat(results.monthlyNetCashFlow) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        ${parseFloat(results.monthlyNetCashFlow).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Investment Summary */}
+                <div className="bg-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700">
+                  <h3 className="text-lg font-bold text-white mb-4">Investment Summary</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-slate-700 rounded-lg p-4">
+                      <p className="text-slate-400 text-xs mb-1">Total ADU Cost</p>
+                      <p className="text-white font-bold text-lg">${parseFloat(results.aduCost).toLocaleString()}</p>
+                      <p className="text-slate-400 text-xs mt-1">{results.region}</p>
+                    </div>
+                    <div className="bg-slate-700 rounded-lg p-4">
+                      <p className="text-slate-400 text-xs mb-1">Your Down Payment</p>
+                      <p className="text-white font-bold text-lg">${parseFloat(results.downPaymentAmount).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-slate-700 rounded-lg p-4">
+                      <p className="text-slate-400 text-xs mb-1">Loan Amount</p>
+                      <p className="text-white font-bold text-lg">${parseFloat(results.loanAmount).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-slate-700 rounded-lg p-4">
+                      <p className="text-slate-400 text-xs mb-1">Annual Cash Flow</p>
+                      <p className="text-green-400 font-bold text-lg">${parseFloat(results.annualNetCashFlow).toLocaleString()}</p>
+                    </div>
+                  </div>
+                  {results.breakEvenMonths && (
+                    <div className="mt-4 p-3 bg-blue-500 bg-opacity-20 border border-blue-500 rounded-lg">
+                      <p className="text-blue-300 text-sm">
+                        <span className="font-semibold">Break-even point:</span> ~{results.breakEvenMonths} months
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700 h-full flex items-center justify-center">
+                <p className="text-slate-400 text-center">
+                  Enter your property details and click "Calculate ROI" to see results here
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center text-slate-400 text-sm">
+          <p>Cost estimates based on regional averages. Actual costs may vary. This calculator is for educational purposes.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
