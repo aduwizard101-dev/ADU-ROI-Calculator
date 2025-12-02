@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADU ROI Calculator - Canada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header-icon {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #cbd5e1;
+        }
+
+        .canada-badge {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .form-group .help-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 24px;
+        }
+
+        .button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .roi-card {
+            background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(22, 163, 74, 0.3);
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .roi-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #86efac;
+            margin-bottom: 8px;
+        }
+
+        .roi-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .roi-subtitle {
+            font-size: 14px;
+            color: #86efac;
+        }
+
+        .flow-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .flow-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .flow-item:last-child {
+            border-bottom: none;
+        }
+
+        .flow-label {
+            color: #cbd5e1;
+        }
+
+        .flow-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        .flow-value.negative {
+            color: #f87171;
+        }
+
+        .flow-value.positive {
+            color: #4ade80;
+        }
+
+        .flow-total {
+            background: #334155;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #475569;
+        }
+
+        .flow-total .flow-label {
+            color: white;
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            background: #334155;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .summary-label {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .summary-region {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .breakeven-box {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+
+        .breakeven-text {
+            color: #93c5fd;
+            font-size: 14px;
+        }
+
+        .breakeven-text strong {
+            font-weight: 600;
+        }
+
+        .placeholder {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon"></div>
+            <h1>ADU ROI Calculator</h1>
+            <p>Analyze the financial potential of adding an accessory dwelling unit</p>
+            <div class="canada-badge">🍁 CANADIAN MARKET</div>
+        </div>
+
+        <div class="grid">
+            <!-- Input Form -->
+            <div class="card">
+                <div class="card-title">🏠 Property Details</div>
+
+                <div class="form-group">
+                    <label for="sqm">ADU Size (sq m)</label>
+                    <input type="number" id="sqm" value="75" min="40" max="150" step="5" placeholder="Enter square metres">
+                    <div class="help-text">Typical range: 40-150 sq m (430-1,615 sq ft)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="postalcode">Postal Code</label>
+                    <input type="text" id="postalcode" maxlength="7" placeholder="A1A 1A1" style="text-transform: uppercase;">
+                    <div class="help-text">First letter determines region</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="rent">Expected Monthly Rent (CAD $)</label>
+                    <input type="number" id="rent" value="2000" min="500" step="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="downpayment">Down Payment (%)</label>
+                    <input type="number" id="downpayment" value="20" min="0" max="100" step="5">
+                </div>
+
+                <div class="form-group">
+                    <label for="rate">Interest Rate (%)</label>
+                    <input type="number" id="rate" value="6.5" min="3" max="12" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="term">Loan Term (years)</label>
+                    <input type="number" id="term" value="25" min="5" max="30" step="1">
+                </div>
+
+                <button class="button" onclick="calculateROI()">Calculate ROI</button>
+            </div>
+
+            <!-- Results -->
+            <div id="resultsContainer">
+                <div class="placeholder">Enter your property details and click "Calculate ROI" to see results here</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cost estimates based on regional averages. Actual costs may vary. This calculator is for educational purposes.</p>
+        </div>
+    </div>
+
+    <script>
+        const costByRegion = {
+            'A': { name: 'Newfoundland & Labrador', costPerSqm: 2400, permitFeePerSqm: 100, softCostPercent: 10, holdingCostMonths: 5 },
+            'B': { name: 'Nova Scotia', costPerSqm: 2600, permitFeePerSqm: 110, softCostPercent: 10, holdingCostMonths: 5 },
+            'C': { name: 'Prince Edward Island', costPerSqm: 2500, permitFeePerSqm: 105, softCostPercent: 10, holdingCostMonths: 5 },
+            'E': { name: 'New Brunswick', costPerSqm: 2450, permitFeePerSqm: 100, softCostPercent: 10, holdingCostMonths: 5 },
+            'G': { name: 'Quebec (East)', costPerSqm: 2800, permitFeePerSqm: 120, softCostPercent: 11, holdingCostMonths: 6 },
+            'H': { name: 'Montreal Region', costPerSqm: 3200, permitFeePerSqm: 140, softCostPercent: 12, holdingCostMonths: 6 },
+            'J': { name: 'Quebec (West)', costPerSqm: 2700, permitFeePerSqm: 115, softCostPercent: 11, holdingCostMonths: 6 },
+            'K': { name: 'Eastern Ontario', costPerSqm: 3000, permitFeePerSqm: 130, softCostPercent: 11, holdingCostMonths: 6 },
+            'L': { name: 'Central Ontario', costPerSqm: 3100, permitFeePerSqm: 135, softCostPercent: 11, holdingCostMonths: 6 },
+            'M': { name: 'Toronto Region', costPerSqm: 3800, permitFeePerSqm: 160, softCostPercent: 13, holdingCostMonths: 7 },
+            'N': { name: 'Southwest Ontario', costPerSqm: 2900, permitFeePerSqm: 125, softCostPercent: 11, holdingCostMonths: 6 },
+            'P': { name: 'Northern Ontario', costPerSqm: 3200, permitFeePerSqm: 130, softCostPercent: 12, holdingCostMonths: 6 },
+            'R': { name: 'Manitoba', costPerSqm: 2600, permitFeePerSqm: 110, softCostPercent: 10, holdingCostMonths: 5 },
+            'S': { name: 'Saskatchewan', costPerSqm: 2550, permitFeePerSqm: 105, softCostPercent: 10, holdingCostMonths: 5 },
+            'T': { name: 'Alberta', costPerSqm: 2850, permitFeePerSqm: 120, softCostPercent: 11, holdingCostMonths: 6 },
+            'V': { name: 'British Columbia', costPerSqm: 4000, permitFeePerSqm: 170, softCostPercent: 14, holdingCostMonths: 7 },
+            'X': { name: 'Northwest Territories', costPerSqm: 3800, permitFeePerSqm: 150, softCostPercent: 13, holdingCostMonths: 6 },
+            'Y': { name: 'Yukon', costPerSqm: 3700, permitFeePerSqm: 145, softCostPercent: 13, holdingCostMonths: 6 },
+        };
+
+        function getRegionFromPostalCode(postal) {
+            const firstLetter = postal.charAt(0).toUpperCase();
+            return costByRegion[firstLetter] || costByRegion['M'];
+        }
+
+        function formatCurrency(value) {
+            return parseFloat(value).toLocaleString('en-CA', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function validatePostalCode(postal) {
+            const cleaned = postal.replace(/\s/g, '').toUpperCase();
+            const regex = /^[A-Z]\d[A-Z]\d[A-Z]\d$/;
+            return regex.test(cleaned);
+        }
+
+        function calculateROI() {
+            const sqm = parseFloat(document.getElementById('sqm').value);
+            const postalcode = document.getElementById('postalcode').value.replace(/\s/g, '');
+            const rent = parseFloat(document.getElementById('rent').value);
+            const downPayment = parseFloat(document.getElementById('downpayment').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const term = parseFloat(document.getElementById('term').value);
+
+            if (!postalcode || postalcode.length < 3) {
+                alert('Please enter a valid postal code (e.g., M5V 3A8)');
+                return;
+            }
+
+            const region = getRegionFromPostalCode(postalcode);
+
+            // Calculate ADU cost with all components (in CAD)
+            const constructionCost = sqm * region.costPerSqm;
+            const permitFees = sqm * region.permitFeePerSqm;
+            const softCosts = constructionCost * (region.softCostPercent / 100);
+            const monthlyInterimRate = (region.holdingCostMonths * (constructionCost + permitFees + softCosts) * 0.06) / 12;
+            const holdingCosts = monthlyInterimRate * region.holdingCostMonths;
+            
+            const totalAduCost = constructionCost + permitFees + softCosts + holdingCosts;
+            const downPaymentAmount = (totalAduCost * downPayment) / 100;
+            const loanAmount = totalAduCost - downPaymentAmount;
+
+            // Calculate monthly payment
+            const monthlyRate = rate / 100 / 12;
+            const numPayments = term * 12;
+            let monthlyPayment;
+
+            if (monthlyRate === 0) {
+                monthlyPayment = loanAmount / numPayments;
+            } else {
+                const power = Math.pow(1 + monthlyRate, numPayments);
+                monthlyPayment = (loanAmount * (monthlyRate * power)) / (power - 1);
+            }
+
+            // Operating expenses (Canadian market)
+            const maintenanceMonthly = rent * 0.05;
+            const propertyTaxMonthly = (totalAduCost * 0.010) / 12; // Slightly lower than US average
+            const insuranceMonthly = 75; // CAD, slightly higher
+
+            const totalExpenses = monthlyPayment + maintenanceMonthly + propertyTaxMonthly + insuranceMonthly;
+            const monthlyNetCashFlow = rent - totalExpenses;
+            const annualNetCashFlow = monthlyNetCashFlow * 12;
+
+            const roi = ((annualNetCashFlow / downPaymentAmount) * 100).toFixed(2);
+            const breakEvenMonths = monthlyNetCashFlow > 0 ? Math.ceil(downPaymentAmount / monthlyNetCashFlow) : null;
+
+            // Convert sqm to sqft for display
+            const sqft = (sqm * 10.764).toFixed(0);
+
+            // Render results
+            let resultsHTML = '<div class="roi-card">' +
+                '<div class="roi-label">Annual ROI</div>' +
+                '<div class="roi-value">' + roi + '%</div>' +
+                '<div class="roi-subtitle">Based on ' + downPayment + '% down payment</div>' +
+                '</div>' +
+                '<div class="flow-card">' +
+                '<div class="card-title">💰 Monthly Cash Flow</div>' +
+                '<div class="flow-item"><span class="flow-label">Monthly Rent</span><span class="flow-value">$' + formatCurrency(rent) + ' CAD</span></div>' +
+                '<div class="flow-item"><span class="flow-label">Loan Payment</span><span class="flow-value negative">-$' + formatCurrency(monthlyPayment) + ' CAD</span></div>' +
+                '<div class="flow-item"><span class="flow-label">Maintenance (5%)</span><span class="flow-value negative">-$' + formatCurrency(maintenanceMonthly) + ' CAD</span></div>' +
+                '<div class="flow-item"><span class="flow-label">Property Tax</span><span class="flow-value negative">-$' + formatCurrency(propertyTaxMonthly) + ' CAD</span></div>' +
+                '<div class="flow-item"><span class="flow-label">Insurance</span><span class="flow-value negative">-$' + formatCurrency(insuranceMonthly) + ' CAD</span></div>' +
+                '<div class="flow-total"><span class="flow-label">Net Monthly Cash Flow</span><span class="flow-value ' + (monthlyNetCashFlow >= 0 ? 'positive' : 'negative') + '">$' + formatCurrency(monthlyNetCashFlow) + ' CAD</span></div>' +
+                '</div>' +
+                '<div class="flow-card"><div class="card-title">📊 Investment Summary</div>' +
+                '<div class="summary-grid">' +
+                '<div class="summary-item"><div class="summary-label">Construction Cost</div><div class="summary-value">$' + formatCurrency(constructionCost) + ' CAD</div><div class="summary-region">' + region.name + ' • ' + sqm + ' sq m (' + sqft + ' sq ft)</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Permit Fees</div><div class="summary-value">$' + formatCurrency(permitFees) + ' CAD</div><div class="summary-region">@$' + (region.permitFeePerSqm).toFixed(0) + '/sq m</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Soft Costs</div><div class="summary-value">$' + formatCurrency(softCosts) + ' CAD</div><div class="summary-region">' + region.softCostPercent + '% of construction</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Holding Costs</div><div class="summary-value">$' + formatCurrency(holdingCosts) + ' CAD</div><div class="summary-region">' + region.holdingCostMonths + ' months</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Total ADU Cost</div><div class="summary-value">$' + formatCurrency(totalAduCost) + ' CAD</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Your Down Payment</div><div class="summary-value">$' + formatCurrency(downPaymentAmount) + ' CAD</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Loan Amount</div><div class="summary-value">$' + formatCurrency(loanAmount) + ' CAD</div></div>' +
+                '<div class="summary-item"><div class="summary-label">Annual Cash Flow</div><div class="summary-value" style="color: #4ade80;">$' + formatCurrency(annualNetCashFlow) + ' CAD</div></div>' +
+                '</div>';
+            
+            if (breakEvenMonths) {
+                resultsHTML += '<div class="breakeven-box"><div class="breakeven-text"><strong>Break-even point:</strong> ~' + breakEvenMonths + ' months</div></div>';
+            }
+            
+            resultsHTML += '</div>';
+
+            document.getElementById('resultsContainer').innerHTML = resultsHTML;
+        }
+
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculateROI();
+        });
+
+        // Format postal code as user types
+        document.getElementById('postalcode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '').toUpperCase();
+            if (value.length > 3) {
+                value = value.slice(0, 3) + ' ' + value.slice(3, 6);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
